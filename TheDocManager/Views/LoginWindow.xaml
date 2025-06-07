@@ -1,0 +1,29 @@
+﻿<!-- Views/LoginWindow.xaml -->
+<Window x:Class="TheDocManager.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Login" Height="300" Width="400" HorizontalAlignment="Center"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Username:" Grid.Row="0" Margin="0,0,0,5" ToolTip="Username" Focusable="False" />
+        <TextBox x:Name="UsernameTextBox" Grid.Row="1" Height="25"
+                 AutomationProperties.Name="UsernameTextBox"/>
+
+        <TextBlock Text="Password:" Grid.Row="2" Margin="0,10,0,5" ToolTip="Password" Focusable="False" />
+        <PasswordBox x:Name="PasswordBox" Grid.Row="3" Height="25" 
+                     AutomationProperties.Name="PasswordBox"/>
+
+        <Button Content="Login" Grid.Row="4" Margin="0,20,0,0" Height="30" Click="LoginButton_Click" x:Name="LoginButton"
+                AutomationProperties.Name="LoginButton"/>
+        <TextBlock Focusable="False" Text="" x:Name="txtWarning" Grid.Row="5" Margin="0,20,0,0" Height="30" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Red"/>
+    </Grid>
+</Window>

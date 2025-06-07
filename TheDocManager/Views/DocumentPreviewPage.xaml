@@ -1,0 +1,26 @@
+﻿<Page x:Class="TheDocManager.Views.DocumentPreviewPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Document Preview">
+
+    <Grid Margin="20">
+        <StackPanel>
+            <TextBlock x:Name="FileNameTextBlock" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+            <TextBlock x:Name="UploadDateTextBlock" FontStyle="Italic" Margin="0,0,0,20"/>
+
+            <Border BorderBrush="Gray" BorderThickness="1" Padding="10" Height="600" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid>
+                    <Image x:Name="PreviewImage" Stretch="Uniform" />
+                    <TextBlock x:Name="UnsupportedTextBlock" Foreground="Red" FontWeight="Bold" TextWrapping="Wrap" Visibility="Collapsed"
+                               Text="This file type cannot be previewed yet. Watch for updates, as this might change!" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"/>
+                </Grid>
+            </Border>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                <Button x:Name="PrevPageButton" Content="Previous Page" Click="PrevPageButton_Click" IsEnabled="False" Margin="5"/>
+                <TextBlock x:Name="PageNumberTextBlock" VerticalAlignment="Center" Margin="5"/>
+                <Button x:Name="NextPageButton" Content="Next Page" Click="NextPageButton_Click" IsEnabled="False" Margin="5"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Page>
