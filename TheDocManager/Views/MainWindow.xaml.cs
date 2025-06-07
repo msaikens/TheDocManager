@@ -13,6 +13,12 @@ namespace TheDocManager.Views
         {
             InitializeComponent();
 
+            if (Environment.Is64BitProcess)
+            {
+                MessageBox.Show("Please run this application as a 32-bi (x86) process to enable scanning functionality.", 
+                    "Unsupported architecture for scanning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+
             collapseStoryboard = (Storyboard)FindResource("CollapseSidebarStoryboard");
             expandStoryboard = (Storyboard)FindResource("ExpandSidebarStoryboard");
         }

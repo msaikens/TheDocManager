@@ -7,6 +7,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Platforms>AnyCPU;x86</Platforms>
+	  <PlatformTarget>x86</PlatformTarget>
+	  <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,6 +22,7 @@
     <PackageReference Include="PdfiumViewer" Version="2.13.0" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.5" />
+    <PackageReference Include="TwainDotNet" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

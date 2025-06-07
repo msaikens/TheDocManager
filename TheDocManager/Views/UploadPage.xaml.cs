@@ -2,15 +2,17 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using TheDocManager.Services;
 
 namespace TheDocManager.Views
 {
     public partial class UploadPage : Page
     {
         private string? selectedFilePath = null;
+        private static string UploadDirectory = Directory.CreateDirectory(AppPaths.DocumentsDirectory).ToString();
         private string _selectedUploadFolder = UploadDirectory;
 
-        private const string UploadDirectory = @"C:\TheDocManager\DocumentsUp";
+        
 
         public UploadPage()
         {
@@ -94,5 +96,12 @@ namespace TheDocManager.Views
                 AddDirectoriesToTreeView(item.Items, dir); // Recursively add subfolders
             }
         }
+        private void ScanButton_Click(object sender, RoutedEventArgs e)
+        {
+            Window parentWindow = Window.GetWindow(this);
+            var scanner = new ScanService(parentWindow);
+            scanner.StartScan();
+        }
+
     }
 }

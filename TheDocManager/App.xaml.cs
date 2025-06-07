@@ -18,7 +18,8 @@ namespace TheDocManager
             // Ensure DB is initialized
             DatabaseService.Initialize();
 
-            string appDirectory = @"C:\TheDocManager\DocumentsUp";
+            string appDirectory = Directory.CreateDirectory(AppPaths.DocumentsDirectory).ToString();
+
             if (!Directory.Exists(appDirectory))
             {
                 Directory.CreateDirectory(appDirectory);

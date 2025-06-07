@@ -3,17 +3,18 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="Upload Document">
 
-    <Grid Margin="20">
+    <Grid Margin="20" Background="White">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="400">
             <TextBlock Text="Upload Document" FontSize="20" FontWeight="Bold" Margin="0,0,0,20" TextAlignment="Center"/>
 
-            <Button Content="Select File..." Height="30" Click="SelectFileButton_Click" />
-            <TextBlock x:Name="SelectedFileTextBlock" Margin="0,10,0,0" Text="No file selected." TextWrapping="Wrap" />
+            <Button Content="Select File..." Height="30" Click="SelectFileButton_Click" Margin="10,0,10,0"/>
+            <Button Content="Scan File..." Height="30" Click="ScanButton_Click" Margin="10,10,10,0"/>
+            <TextBlock x:Name="SelectedFileTextBlock" Margin="10,10,10,0" Text="No file selected." TextWrapping="Wrap" />
 
-            <TextBlock Text="Select Upload Folder:" FontWeight="SemiBold" Margin="0,20,0,5"/>
-            <TreeView x:Name="FolderTreeView" Height="200" SelectedItemChanged="TreeView_selectedItemChanged"/>
+            <TextBlock Text="Select Upload Folder:" FontWeight="SemiBold" Margin="10,20,10,5"/>
+            <TreeView x:Name="FolderTreeView" Height="200" SelectedItemChanged="TreeView_selectedItemChanged" Margin="10,0,10,0"/>
 
-            <Button Content="Upload" Height="30" Margin="0,20,0,0" Click="UploadButton_Click" IsEnabled="False" x:Name="UploadButton"/>
+            <Button Content="Upload" Height="30" Margin="10,20,10,10" Click="UploadButton_Click" IsEnabled="False" x:Name="UploadButton"/>
         </StackPanel>
     </Grid>
 </Page>

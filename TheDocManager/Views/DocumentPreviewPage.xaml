@@ -3,7 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="Document Preview">
 
-    <Grid Margin="20">
+    <Grid Margin="20" Background="White">
         <StackPanel>
             <TextBlock x:Name="FileNameTextBlock" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
             <TextBlock x:Name="UploadDateTextBlock" FontStyle="Italic" Margin="0,0,0,20"/>

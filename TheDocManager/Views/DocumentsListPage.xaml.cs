@@ -13,7 +13,7 @@ namespace TheDocManager.Views
     public partial class DocumentsListPage : Page
     {
         public ObservableCollection<FileSystemItem> Items { get; set; } = [];
-        public static string RootFolderPath => @"C:\TheDocManager\DocumentsUp";
+        public static string RootFolderPath => Directory.CreateDirectory(path: AppPaths.DocumentsDirectory).ToString();
         private TreeViewItem? _lastHighlightedItem = null;
 
         public DocumentsListPage()
@@ -49,12 +49,12 @@ namespace TheDocManager.Views
             if ( DocumentsTreeView.SelectedItem is  FileSystemItem selectedItem && !selectedItem.IsDirectory && selectedItem is not null)
             {
                 string filePath = selectedItem.FullPath;
-                string fileName = selectedItem.Name ?? System.IO.Path.GetFileName(filePath);
+                string fileName = selectedItem.Name ?? Path.GetFileName(filePath);
                 DateTime uploadDate = DateTime.ParseExact(
                     selectedItem.UploadDate.ToString("yyyy-MM-dd"),
                     "yyyy-MM-dd",
                     CultureInfo.InvariantCulture);
-                string fileType = selectedItem.FileType ?? System.IO.Path.GetExtension(filePath).Trim('.').ToUpper();
+                string fileType = selectedItem.FileType ?? Path.GetExtension(filePath).Trim('.').ToUpper();
 
                 MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
                 mainWindow.MainFrame.Navigate(new DocumentPreviewPage(filePath, fileName, uploadDate, fileType));
@@ -308,19 +308,54 @@ namespace TheDocManager.Views
                 }
             }
         }
+        private void AddFile_Click(object sender, RoutedEventArgs e)
+        {
+            if (DocumentsTreeView.SelectedItem is FileSystemItem selectedItem && selectedItem.IsDirectory)
+            {
+                var dialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    Title = "Select file to add",
+                    Filter = "All Files|*.*",
+                    Multiselect = false
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    string sourceFilePath = dialog.FileName;
+                    string fileName = Path.GetFileName(sourceFilePath);
+                    string sanitizedFileName = Security.Sanitizer.SanitizeFileOrFolderName(fileName);
+                    string destinationPath = Path.Combine(selectedItem.FullPath, sanitizedFileName);
+
+                    try
+                    {
+                        File.Copy(sourceFilePath, destinationPath, overwrite: false);
+                        MessageBox.Show($"File '{sanitizedFileName}' added successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                        RefreshTreeView();
+                    }
+                    catch (IOException ex)
+                    {
+                        MessageBox.Show($"Error copying file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please right-click on a folder to add a file.", "Invalid Selection", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
 
         private void DocumentsTreeView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (DocumentsTreeView.SelectedItem is FileSystemItem selectedItem && !selectedItem.IsDirectory && selectedItem.FullPath is not null)
             {
                 string filePath = selectedItem.FullPath;
-                string fileName = selectedItem.Name ?? System.IO.Path.GetFileName(filePath);
+                string fileName = selectedItem.Name ?? Path.GetFileName(filePath);
                 DateTime uploadDate = 
                     DateTime.ParseExact(
                         selectedItem.UploadDate.ToString("yyyy-MM-dd"),
                         "yyyy-MM-dd",
                         CultureInfo.InvariantCulture);
-                string fileType = selectedItem.FileType ?? System.IO.Path.GetExtension(filePath).Trim('.').ToUpper();
+                string fileType = selectedItem.FileType ?? Path.GetExtension(filePath).Trim('.').ToUpper();
 
                 // Navigate to the preview page
                 MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
@@ -351,6 +386,72 @@ namespace TheDocManager.Views
                     DirectoryCopy(subdir.FullName, tempPath, copySubDirs);
                 }
             }
+        }
+        private void RenameItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (DocumentsTreeView.SelectedItem is FileSystemItem selectedItem)
+            {
+                string currentName = selectedItem.Name;
+                string currentPath = selectedItem.FullPath;
+
+                string? input = Microsoft.VisualBasic.Interaction.InputBox(
+                    $"Enter a new name for '{currentName}':",
+                    "Rename Item",
+                    currentName);
+
+                if (!string.IsNullOrWhiteSpace(input))
+                {
+                    string sanitized = Sanitizer.SanitizeFileOrFolderName(input.Trim());
+                    string newPath = Path.Combine(Path.GetDirectoryName(currentPath)!, sanitized);
+
+                    try
+                    {
+                        if (selectedItem.IsDirectory)
+                            Directory.Move(currentPath, newPath);
+                        else
+                            File.Move(currentPath, newPath);
+
+                        RefreshTreeView();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Failed to rename: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+        private void DeleteItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (DocumentsTreeView.SelectedItem is FileSystemItem selectedItem)
+            {
+                var confirm = MessageBox.Show(
+                    $"Are you sure you want to delete '{selectedItem.Name}'?",
+                    "Confirm Delete",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (confirm == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        if (selectedItem.IsDirectory)
+                            Directory.Delete(selectedItem.FullPath, true); // recursive
+                        else
+                            File.Delete(selectedItem.FullPath);
+
+                        RefreshTreeView();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Failed to delete: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+        private void RefreshTreeView()
+        {
+            Items.Clear();
+            LoadFileSystem();
         }
 
     }
