@@ -1,66 +1,54 @@
-﻿using System.IO;
-using System.Runtime.CompilerServices;
+﻿// Security/Sanitizer.cs
 using System.Text.RegularExpressions;
 
 namespace TheDocManager.Security
 {
-    public partial class Sanitizer
+    public static partial class Sanitizer
     {
-        private static readonly string[] ReservedWindowsNames =
-        [
-            "CON", "PRN", "AUX", "NUL",
-            "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
-            "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
-        ];
+        // === Regex Definitions ===
 
-        public static string[] ReservedWindowsNames1 => ReservedWindowsNames;
+        [GeneratedRegex(@"[\\/:*?""<>|]", RegexOptions.Compiled)]
+        private static partial Regex InvalidCharsRegex();
 
+        [GeneratedRegex(@"<script[^>]*?>.*?</script>", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        private static partial Regex ScriptTagRegex();
+
+        [GeneratedRegex(@"<.*?>", RegexOptions.Compiled)]
+        private static partial Regex HtmlTagRegex();
         /// <summary>
-        /// Sanitizes a folder or file name by removing invalid characters and reserved names.
+        /// Sanitizes a file or folder name by removing invalid characters.
         /// </summary>
         public static string SanitizeFileOrFolderName(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
-                throw new ArgumentException("Input cannot be empty.");
+                return "Unnamed";
 
-            // Remove invalid characters
-            foreach (var c in Path.GetInvalidFileNameChars())
-                input = input.Replace(c.ToString(), string.Empty);
-
-            input = input.Trim();
-
-            // Prevent reserved names
-            if (ReservedWindowsNames.Contains(input.ToUpperInvariant()))
-                throw new ArgumentException("The name provided is reserved or contains a reserved name and is not allowed.");
-
-            return input;
+            return InvalidCharsRegex().Replace(input, "").Trim();
         }
 
         /// <summary>
-        /// Sanitizes a general user input string (e.g., usernames, search terms).
-        /// Removes potentially dangerous characters.
+        /// Sanitizes input for general display or storage (e.g., user input in forms).
         /// </summary>
-        public static string SanitizeTextInput(string input)
+        public static string SanitizeUserInput(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
                 return string.Empty;
 
-            // Basic XSS prevention: remove HTML/script tags
-            string sanitized = Regex.Replace(input, @"<.*?>", string.Empty);
+            string safe = input.Trim();
 
-            // You can optionally trim and restrict length
-            return sanitized.Trim();
+            // Remove script tags and HTML
+            safe = ScriptTagRegex().Replace(safe, string.Empty);
+            safe = HtmlTagRegex().Replace(safe, string.Empty);
+
+            // Normalize quotes to avoid injection vectors
+            safe = safe.Replace("\"", "")
+                       .Replace("'", "")
+                       .Replace(";", "")
+                       .Replace("--", "");
+
+            return safe;
         }
 
-        /// <summary>
-        /// Escapes inputs for SQL use when parameterized queries are not feasible (not recommended).
-        /// </summary>
-        /// <returns>A single quote escaped String value </returns>
-        /// <remarks>This function sanitizes string inputs used in SQL when parameterization isn't used. A ' is repaced with ''.</remarks>
-        /// <param name="input">SQL string to be escaped</param>
-        public static string EscapeForSql(string input)
-        {
-            return input.Replace("'", "''");
-        }
+
     }
 }

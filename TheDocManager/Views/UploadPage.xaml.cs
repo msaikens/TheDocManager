@@ -9,7 +9,7 @@ namespace TheDocManager.Views
     public partial class UploadPage : Page
     {
         private string? selectedFilePath = null;
-        private static string UploadDirectory = Directory.CreateDirectory(AppPaths.DocumentsDirectory).ToString();
+        private static readonly string UploadDirectory = Directory.CreateDirectory(AppPaths.DocumentsDirectory).ToString();
         private string _selectedUploadFolder = UploadDirectory;
 
         

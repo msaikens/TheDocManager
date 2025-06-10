@@ -22,7 +22,7 @@ namespace TheDocManager.Views
             InitializeComponent();
         }
 
-        public DocumentPreviewPage(string filepath, string filename, DateTime uploadDate, string fileType)
+        public DocumentPreviewPage(string filepath, string filename, DateTime uploadDate, string fileType = "")
         {
             FileNameTextBlock.Text = filename;
             UploadDateTextBlock.Text = $"Uploaded on: {uploadDate:g}";

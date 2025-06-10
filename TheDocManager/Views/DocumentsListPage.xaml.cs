@@ -71,8 +71,8 @@ namespace TheDocManager.Views
                 if (!selectedItem.IsDirectory)
                 {
                     // Load document preview here, e.g.:
-                    // Assuming your main window has a frame or control named "PreviewFrame"
-                    var mainWindow = Application.Current.MainWindow as MainWindow;
+
+                    var mainWindow = (MainWindow)Application.Current.MainWindow;
                     mainWindow?.MainFrame.Navigate(selectedItem.FullPath);
                 }
             }
