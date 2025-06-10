@@ -55,6 +55,6 @@ namespace TheDocManager.Interop
 
         [LibraryImport("BitmapConverter.dll")]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
-        public static extern void FreeBuffer(IntPtr buffer);
+        internal static partial void FreeBuffer(IntPtr buffer);
     }
 }
