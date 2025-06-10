@@ -1,12 +1,12 @@
 ﻿using PdfiumViewer;
 using System.Drawing;
-using System.Runtime.InteropServices;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Interop;
-using System.Windows.Media.Imaging;
-using System.IO;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using TheDocManager.Interop;
 
 namespace TheDocManager.Views
 {
@@ -88,7 +88,8 @@ namespace TheDocManager.Views
             if (_pdfDocument == null) return;
 
             Bitmap bmp = (Bitmap)_pdfDocument.Render(pageNumber, 96, 96, PdfRenderFlags.Annotations);
-            PreviewImage.Source = ConvertBitmapToBitmapSource(bmp);
+            //PreviewImage.Source = ConvertBitmapToBitmapSource(bmp);
+            PreviewImage.Source = LoadBitmapUsingNativeInterop(bmp);
             bmp.Dispose();
 
             PageNumberTextBlock.Text = $"Page {pageNumber + 1} of {_totalPages}";
@@ -124,7 +125,7 @@ namespace TheDocManager.Views
             _currentPage++;
             RenderPdfPage(_currentPage);
         }
-
+        [Obsolete("Rewritten to avoid unsafe code. Use LoadBitmapUsingNativeInterop instead ")]
         private static unsafe BitmapSource ConvertBitmapToBitmapSource(Bitmap bitmap)
         {
             var rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
@@ -149,7 +150,7 @@ namespace TheDocManager.Views
                         (nint)(void*)bmpData.Scan0,
                         bmpData.Stride * bitmap.Height,
                         bmpData.Stride);
-                   
+
                 }
             }
             finally
@@ -158,5 +159,67 @@ namespace TheDocManager.Views
                 GC.Collect();
             }
         }
+        public static BitmapSource? LoadBitmapUsingNativeInterop(Bitmap bitmap)
+        {
+            if (bitmap == null)
+                ArgumentNullException.ThrowIfNull(nameof(bitmap));
+
+            // Lock the bitmap bits to get access to the raw pixel buffer
+            var rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+            var bmpData = bitmap.LockBits(rect, ImageLockMode.ReadOnly, bitmap.PixelFormat);
+
+            try
+            {
+                int inputFormat = bitmap.PixelFormat == System.Drawing.Imaging.PixelFormat.Format24bppRgb ? 1 :
+                                  bitmap.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb ? 2 : 0;
+
+                if (inputFormat == 0)
+                    throw new NotSupportedException($"Unsupported pixel format: {bitmap.PixelFormat}");
+
+
+                bool result = NativeBitmapInterop.ConvertAndProcessBitmap(
+                    bmpData.Scan0,
+                    bitmap.Width,
+                    bitmap.Height,
+                    bmpData.Stride,
+                    inputFormat,
+                    2, // outputFormat: 2 = 32bpp ARGB
+                    0, // rotateDegrees
+                    false, // flipHorizontal
+                    false, // flipVertical
+                    false, // compressToPng
+                    out nint outBuffer,
+                    out int outSize,
+                    out int outDpiX,
+                    out int outDpiY
+                );
+
+                if (!result || outBuffer == IntPtr.Zero)
+                    return null;
+
+                try
+                {
+                    return BitmapSource.Create(
+                        bitmap.Width,
+                        bitmap.Height,
+                        outDpiX,
+                        outDpiY,
+                        PixelFormats.Bgra32,
+                        null,
+                        outBuffer,
+                        outSize,
+                        bmpData.Stride);
+                }
+                finally
+                {
+                    NativeBitmapInterop.FreeBuffer(outBuffer);
+                }
+            }
+            finally
+            {
+                bitmap.UnlockBits(bmpData);
+            }
+        }
+
     }
 }

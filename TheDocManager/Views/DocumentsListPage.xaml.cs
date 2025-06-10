@@ -78,20 +78,16 @@ namespace TheDocManager.Views
             }
         }
 
-        private void DocumentsTreeView_ContextMenuOpening(object sender, ContextMenuEventArgs e)
-        {
-            // Optional: dynamically generate context menu based on selection
-            throw new NotImplementedException();
-        }
+        private void DocumentsTreeView_ContextMenuOpening(object sender, ContextMenuEventArgs contextMenuEventArgs) => throw new NotImplementedException();
 
         // ----------------------------
         // Drag & Drop Support
         // ----------------------------
-        private void DocumentsTreeView_Drop(object sender, DragEventArgs e)
+        private void DocumentsTreeView_Drop(object sender, DragEventArgs drageventargs)
         {
-            if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
+            if (!drageventargs.Data.GetDataPresent(DataFormats.FileDrop)) return;
 
-            var droppedFiles = (string[])e.Data.GetData(DataFormats.FileDrop)!;
+            var droppedFiles = (string[])drageventargs.Data.GetData(DataFormats.FileDrop)!;
 
             // Get the TreeViewItem the user dropped onto
             if (sender is TreeView treeView && treeView.SelectedItem is FileSystemItem targetItem)
@@ -128,17 +124,17 @@ namespace TheDocManager.Views
             }
         }
 
-        private void DocumentsTreeView_PreviewDrop(object sender, DragEventArgs e)
+        private void DocumentsTreeView_PreviewDrop(object sender, DragEventArgs dragEventArgs)
         {
 #if DEBUG
             ArgumentNullException.ThrowIfNull(sender);
-            ArgumentNullException.ThrowIfNull(e);
+            ArgumentNullException.ThrowIfNull(dragEventArgs);
 #endif
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (dragEventArgs.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                string[] droppedPaths = (string[])e.Data.GetData(DataFormats.FileDrop);
+                string[] droppedPaths = (string[])dragEventArgs.Data.GetData(DataFormats.FileDrop);
 
-                var targetItem = VisualUpwardSearch<TreeViewItem>(source: (DependencyObject)e.OriginalSource);
+                var targetItem = VisualUpwardSearch<TreeViewItem>(source: (DependencyObject)dragEventArgs.OriginalSource);
 
                 string destinationPath = RootFolderPath;
                 if (targetItem?.DataContext is FileSystemItem targetData && targetData.IsDirectory)
@@ -174,11 +170,11 @@ namespace TheDocManager.Views
                 LoadFileSystem();
             }
         }
-        private void DocumentsTreeView_DragLeave(object sender, DragEventArgs e)
+        private void DocumentsTreeView_DragLeave(object sender, DragEventArgs dragEventArgs)
         {
 #if DEBUG
             ArgumentNullException.ThrowIfNull(sender);
-            ArgumentNullException.ThrowIfNull(e);
+            ArgumentNullException.ThrowIfNull(dragEventArgs);
 #endif           
             if (_lastHighlightedItem != null)
             {
@@ -188,17 +184,17 @@ namespace TheDocManager.Views
             }
         }
 
-        private void DocumentsTreeView_DragOver(object sender, DragEventArgs e)
+        private void DocumentsTreeView_DragOver(object sender, DragEventArgs dragEventArgs)
         {
 #if DEBUG
             ArgumentNullException.ThrowIfNull(sender);
-            ArgumentNullException.ThrowIfNull(e);
+            ArgumentNullException.ThrowIfNull(dragEventArgs);
 #endif         
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (dragEventArgs.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                e.Effects = DragDropEffects.Copy;
+                dragEventArgs.Effects = DragDropEffects.Copy;
 
-                var currentItem = VisualUpwardSearch<TreeViewItem>((DependencyObject)e.OriginalSource);
+                var currentItem = VisualUpwardSearch<TreeViewItem>((DependencyObject)dragEventArgs.OriginalSource);
 
                 if (_lastHighlightedItem != null && _lastHighlightedItem != currentItem)
                 {
@@ -219,7 +215,7 @@ namespace TheDocManager.Views
             }
             else
             {
-                e.Effects = DragDropEffects.None;
+                dragEventArgs.Effects = DragDropEffects.None;
                 if (_lastHighlightedItem != null)
                 {
                     _lastHighlightedItem.ClearValue(Border.BorderBrushProperty);
@@ -228,10 +224,10 @@ namespace TheDocManager.Views
                 }
             }
 
-            e.Handled = true;
+            dragEventArgs.Handled = true;
         }
 
-        private void DocumentsTreeView_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void DocumentsTreeView_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs mouse)
         {
             // Required for certain drag behaviors
             throw new NotImplementedException();
@@ -269,7 +265,7 @@ namespace TheDocManager.Views
                 CopyDirectory(directory, destSubDir);
             }
         }
-        private void AddFolder_Click(object sender, RoutedEventArgs e)
+        private void AddFolder_Click(object sender, RoutedEventArgs routedEventArgs)
         {
             if (DocumentsTreeView.SelectedItem is not FileSystemItem selectedItem)
             {
@@ -308,7 +304,7 @@ namespace TheDocManager.Views
                 }
             }
         }
-        private void AddFile_Click(object sender, RoutedEventArgs e)
+        private void AddFile_Click(object sender, RoutedEventArgs routedEventArgs)
         {
             if (DocumentsTreeView.SelectedItem is FileSystemItem selectedItem && selectedItem.IsDirectory)
             {
@@ -344,7 +340,7 @@ namespace TheDocManager.Views
             }
         }
 
-        private void DocumentsTreeView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void DocumentsTreeView_MouseDoubleClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
         {
             if (DocumentsTreeView.SelectedItem is FileSystemItem selectedItem && !selectedItem.IsDirectory && selectedItem.FullPath is not null)
             {
@@ -387,7 +383,7 @@ namespace TheDocManager.Views
                 }
             }
         }
-        private void RenameItem_Click(object sender, RoutedEventArgs e)
+        private void RenameItem_Click(object sender, RoutedEventArgs routedEventArgs)
         {
             if (DocumentsTreeView.SelectedItem is FileSystemItem selectedItem)
             {
@@ -420,7 +416,7 @@ namespace TheDocManager.Views
                 }
             }
         }
-        private void DeleteItem_Click(object sender, RoutedEventArgs e)
+        private void DeleteItem_Click(object sender, RoutedEventArgs routedEventArgs)
         {
             if (DocumentsTreeView.SelectedItem is FileSystemItem selectedItem)
             {
